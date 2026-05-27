@@ -24,12 +24,12 @@
 %
 %    - Latest version of this code may be downloaded from: https://ecse.monash.edu/staff/eviterbo/
 %    - Freely distributed for educational and research purposes
-%%
+%% OTFS channel generator
 function [taps,delay_taps,Doppler_taps,chan_coef] = OTFS_channel_gen(N,M)
 %% Channel for testing%%%%%
 %channel with 4 taps of uniform power%%% 
 taps = 3;
-%delay_taps = [0 1 2 3];
+%delay_taps = [0 1];
 %Doppler_taps = [0 1 2 3];
 % test
 delay_taps = [0 1 2];

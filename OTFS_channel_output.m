@@ -24,7 +24,7 @@
 %
 %    - Latest version of this code may be downloaded from: https://ecse.monash.edu/staff/eviterbo/
 %    - Freely distributed for educational and research purposes
-%%
+%% OTFS channel output
 function r = OTFS_channel_output(N,M,taps,delay_taps,Doppler_taps,chan_coef,sigma_2,s)
 %% wireless channel and noise 
 L = max(delay_taps);
