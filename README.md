@@ -1,8 +1,8 @@
 # OTFS-IM Simulation Framework
 
-A professional-grade, mathematically consistent MATLAB simulation framework designed to evaluate and analyze the performance of Orthogonal Time Frequency Space with Index Modulation (OTFS-IM) systems. 
+A MATLAB-based simulation framework for evaluating Orthogonal Time Frequency Space with Index Modulation (OTFS-IM) systems over doubly dispersive wireless channels.
 
-This project implements a complete physical layer (PHY) transceiver pipeline, evaluating Bit Error Rate (BER) and Spectral Efficiency over highly doubly dispersive (time-varying and frequency-selective) channels. The receiver architecture features a localized Message Passing (MP) detector integrated with a heuristic True LLR with Reliability Scaling algorithm to optimize index detection in high-mobility 6G vehicular scenarios.
+The project implements an OTFS physical-layer transceiver pipeline with BER and spectral efficiency analysis under high-mobility channel conditions. The receiver includes Message Passing (MP)-based detection and pattern selection strategies for improving index detection performance.
 
 ---
 
