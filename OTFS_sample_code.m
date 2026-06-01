@@ -6,7 +6,7 @@ N = 10;                     % Number of Doppler bins
 M = 12;                     % Number of Delay bins
 N_total = N * M;            % Total resource elements per frame
 rng(1);                     % Set random seed
-N_fram = 500;               % Number of simulated frames
+N_fram = 1000;               % Number of simulated frames
 EbN0_dB = 5:5:30;           % E_b/N_0 range
 % --- Baseline OTFS Configuration ---
 M_mod_otfs = 4;             % 4-QAM
@@ -32,16 +32,97 @@ EsN0_im_dB   = EbN0_dB + 10*log10(se_im);
 eng_sqrt = sqrt((M_mod_otfs-1)/6*(2^2)); 
 sigma_2_otfs = abs(eng_sqrt * sqrt(1./ (10.^(EsN0_otfs_dB/10)))).^2;
 sigma_2_im   = abs(eng_sqrt * sqrt(1./ (10.^(EsN0_im_dB/10)))).^2;
+
+USE_RANDOM_PATTERN = false;
 %% =========================================================================
-%  3. PATTERN SELECTION (Heuristic-based)
+%  3. OPTIMAL HAMMING DISTANCE PATTERN SELECTION (OHD-PS)
 % =========================================================================
+
 ALL_PATS = nchoosek(1:n,k);
+
 num_total_pats = size(ALL_PATS,1);
 num_selected_pats = 2^b1;
-% Chọn các pattern dựa trên khoảng cách Hamming tới vector không
-[~, sorted_idx] = sort(sum(ALL_PATS, 2), 'descend');
-idx = sorted_idx(1:num_selected_pats);
-MAP_TABLE = ALL_PATS(idx,:);
+
+BIN_PATS = zeros(num_total_pats,n);
+
+for i = 1:num_total_pats
+    BIN_PATS(i,ALL_PATS(i,:)) = 1;
+end
+
+D = zeros(num_total_pats);
+
+for i = 1:num_total_pats
+    for j = i+1:num_total_pats
+        D(i,j) = sum(xor(BIN_PATS(i,:),BIN_PATS(j,:)));
+        D(j,i) = D(i,j);
+    end
+end
+
+all_sets = nchoosek(1:num_total_pats,num_selected_pats);
+
+best_dmin = -inf;
+best_set = [];
+
+for s = 1:size(all_sets,1)
+
+    candidate = all_sets(s,:);
+
+    dmin = inf;
+
+    for i = 1:length(candidate)-1
+        for j = i+1:length(candidate)
+            dmin = min(dmin,D(candidate(i),candidate(j)));
+        end
+    end
+
+    if dmin > best_dmin
+        best_dmin = dmin;
+        best_set = candidate;
+    end
+
+end
+
+%added
+if USE_RANDOM_PATTERN
+
+    rng(100);
+
+    idx_rand = randperm(num_total_pats,num_selected_pats);
+
+    MAP_TABLE = ALL_PATS(idx_rand,:);
+
+    fprintf('Random Pattern Selection\n');
+
+else
+
+    MAP_TABLE = ALL_PATS(best_set,:);
+
+    fprintf('Optimal Hamming Distance Pattern Set Found\n');
+    fprintf('Minimum Hamming Distance = %d\n',best_dmin);
+
+end
+
+disp('Selected Pattern Table:')
+disp(MAP_TABLE)
+dist_list = [];
+
+for i = 1:size(MAP_TABLE,1)-1
+    for j = i+1:size(MAP_TABLE,1)
+
+        d = sum(xor( ...
+            BIN_PATS(best_set(i),:), ...
+            BIN_PATS(best_set(j),:) ));
+
+        dist_list = [dist_list d];
+
+    end
+end
+
+fprintf('\n');
+fprintf('Minimum HD = %.2f\n',min(dist_list));
+fprintf('Average HD = %.2f\n',mean(dist_list));
+fprintf('Maximum HD = %.2f\n',max(dist_list));
+fprintf('\n');
 %% =========================================================================
 %  4. BASELINE OTFS SIMULATION
 % =========================================================================
@@ -71,7 +152,10 @@ for iesn0 = 1:length(EbN0_dB)
         bits_im = randi([0,1], lambda, 1);
         x_vec = zeros(N_total, 1); ptr = 1;
         for ib = 1:g
-            m_tx = bi2de(bits_im(ptr:ptr+b1-1).', 'left-msb');
+            %m_tx = bi2de(bits_im(ptr:ptr+b1-1).', 'left-msb');
+            bin_idx = bi2de(bits_im(ptr:ptr+b1-1).','left-msb');
+
+            m_tx = bitxor(bin_idx,floor(bin_idx/2));
             pos = MAP_TABLE(m_tx + 1, :);
             s_qam = qammod(bi2de(reshape(bits_im(ptr+b1:ptr+b1+b2-1), M_bits_im, []).', 'left-msb'), M_mod_im) * alpha;
             x_vec((ib-1)*n + pos) = s_qam; 
@@ -90,16 +174,27 @@ for iesn0 = 1:length(EbN0_dB)
             p_zero = max(sum_prob(idx_blk, M_mod_im+1), 1e-15);
             p_active = max(1 - p_zero, 1e-15);
             score = zeros(2^b1, 1);
+
+            reliability = abs(p_active - 0.5);
             for mc = 1:2^b1
                 pat = MAP_TABLE(mc, :);
                 inactive = setdiff(1:n, pat);
-                % RELIABILITY SCALING: Hệ số 1.1 ưu tiên thông tin Active
-                score(mc) = 1.1 * sum(log(p_active(pat))) + 1.0 * sum(log(p_zero(inactive)));
+                score(mc) = sum(reliability(pat).*log(p_active(pat))) + sum(reliability(inactive).*log(p_zero(inactive)));
             end
             [~, b_m] = max(score); b_m = b_m - 1;
             pos_h = MAP_TABLE(b_m + 1, :);
             b_idx_tx = bits_im(rx_p:rx_p+b1-1);
-            b_idx_rx = de2bi(b_m, b1, 'left-msb').';
+            %b_idx_rx = de2bi(b_m, b1, 'left-msb').';
+            gray = b_m;
+
+            bin = gray;
+            
+            while any(bitshift(gray,-1))
+                gray = bitshift(gray,-1);
+                bin = bitxor(bin,gray);
+            end
+            
+            b_idx_rx = de2bi(bin,b1,'left-msb').';
             b_sym_tx = bits_im(rx_p+b1:rx_p+b1+b2-1);
             b_sym_rx = reshape(de2bi(qamdemod(x_mp(idx_blk(pos_h)), M_mod_im), M_bits_im, 'left-msb').', [], 1);
             err_idx_bits(iesn0) = err_idx_bits(iesn0) + sum(xor(b_idx_tx, b_idx_rx));
@@ -129,11 +224,30 @@ for i = 1:length(EbN0_dB)
     fprintf('%5d | %8.5f | %12.5f | %9.5f | %10.5f\n', ...
         EbN0_dB(i), ber_otfs(i), ber_im(i), ber_idx(i), ber_sym(i));
 end
+
+fprintf('\nEb/N0 | BER Index | BER Symbol | Ratio(Index/Symbol)\n');
+for i = 1:length(EbN0_dB)
+    fprintf('%5d | %9.5f | %10.5f | %8.2f\n', ...
+        EbN0_dB(i), ...
+        ber_idx(i), ...
+        ber_sym(i), ...
+        ber_idx(i)/max(ber_sym(i),1e-10));
+end
 figure('Color', 'w');
-semilogy(EbN0_dB, ber_otfs, '-ks', 'LineWidth', 1.5); hold on;
+
+semilogy(EbN0_dB, ber_otfs, '-ks', 'LineWidth', 1.5);
+hold on;
+
 semilogy(EbN0_dB, ber_im, '-ro', 'LineWidth', 1.5);
-semilogy(EbN0_dB, ber_idx, '--b^', 'LineWidth', 1.2); 
-semilogy(EbN0_dB, ber_sym, '--mv', 'LineWidth', 1.2); 
-grid on; xlabel('Eb/N0 (dB)'); ylabel('BER');
-legend('OTFS', 'OTFS-IM Total', 'Index Error', 'Symbol Error');
-toc
+
+semilogy(EbN0_dB, ber_idx, '--b^', 'LineWidth', 1.2);
+semilogy(EbN0_dB, ber_sym, '--mv', 'LineWidth', 1.2);
+
+grid on;
+xlabel('Eb/N0 (dB)');
+ylabel('BER');
+
+legend('OTFS', ...
+       'OTFS-IM', ...
+       'Index Error', ...
+       'Symbol Error');
