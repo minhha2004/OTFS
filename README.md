@@ -1,49 +1,151 @@
-# OTFS-IM Simulation Framework
+# OTFS-IM OHD Simulation
 
-A MATLAB-based simulation framework for evaluating Orthogonal Time Frequency Space with Index Modulation (OTFS-IM) systems over doubly dispersive wireless channels.
+MATLAB simulation code for comparing conventional OTFS with OTFS using Index
+Modulation (OTFS-IM). The current project state focuses on one final method:
+OHD-based activation-pattern selection with MP detection and block-wise joint
+MAP index/symbol decision.
 
-The project implements an OTFS physical-layer transceiver pipeline with BER and spectral efficiency analysis under high-mobility channel conditions. The receiver includes Message Passing (MP)-based detection and pattern selection strategies for improving index detection performance.
-
----
-
-## Key Features
-
-* **Advanced Transceiver Pipeline:** Full implementation of SFFT/ISFFT block processing for Delay-Doppler (DD) and Time-Frequency (TF) grid mappings.
-* **Localized Index Modulation (OTFS-IM):** Supports flexible (n, k) sub-block configurations (e.g., n=6, k=3) with dynamic power scaling to preserve energy balance.
-* **Heuristic Pattern Selection:** Implements sophisticated Hamming-distance metric tables to choose optimal active sub-carrier activation patterns.
-* **Enhanced Message Passing Detector:** Features a customized MP detector backend operating with explicit paper-grade channel normalization.
-* **True LLR with Reliability Biasing:** Leverages a weighted log-MAP scoring algorithm (with active hypothesis scaling) to drastically suppress index estimation errors at high SNR.
-* **Automated Analytical Visualization:** Built-in benchmarking engine comparing Baseline OTFS vs. OTFS-IM Total, Index, and Symbol error boundaries with automated MATLAB figure plotting.
+The code is organized so that the main script only connects configuration,
+OHD pattern selection, simulation, reporting, and plotting.
 
 ---
 
-## System Model & Core Dependencies
+## Current Experiment
 
-### Simulation Stack (MATLAB Environment)
-* **MATLAB Core Engine:** Recommended version R2022a or newer (requires Communication Toolbox).
-* **qammod / qamdemod:** Configured with explicit 'UnitAveragePower', true to maintain strict paper-grade mathematical consistency.
+Default configuration is defined in `config/config_otfs_im.m`.
 
-### Repository Component Structure
-* **OTFS_sample_code.m:** The core simulation wrapper handling parameters initialization, SNR loops, and main execution blocks.
-* **OTFS_channel_gen.m:** High-mobility channel generator computing severe Doppler shifts and multi-path delay profiles.
-* **OTFS_channel_output.m:** Simulates physical channel interaction by applying time-varying fading taps and AWGN noise power.
-* **OTFS_modulation.m / OTFS_demodulation.m:** Core mod/demod blocks executing Heisenberg and Wigner-Ville transforms.
-* **OTFS_mp_detector.m:** Iterative Message Passing signal estimation engine calculating probability convergence grids.
-* **UAMP.m:** Unitary Approximate Message Passing alternative implementation for performance comparisons.
+| Parameter | Current value | Description |
+| --- | ---: | --- |
+| `N` | 10 | Doppler bins |
+| `M` | 12 | Delay bins |
+| `N_total` | 120 | Total DD resource elements |
+| `N_fram` | 1000 | Monte Carlo frames |
+| `EbN0_dB` | `5:5:30` | Simulated Eb/N0 range |
+| `M_mod_otfs` | 4 | Baseline OTFS QPSK / 4-QAM |
+| `n` | 4 | OTFS-IM block size |
+| `k` | 3 | Active positions per IM block |
+| `M_mod_im` | 4 | Active-symbol QPSK / 4-QAM |
+| `se_otfs` | 2.00 | Baseline OTFS spectral efficiency |
+| `se_im` | 2.00 | OTFS-IM spectral efficiency for `n=4,k=3` |
+
+With `n=4,k=3`, OTFS-IM has the same spectral efficiency as baseline OTFS:
+
+```text
+OTFS SE    = 2.00 bits/symbol
+OTFS-IM SE = 2.00 bits/symbol
+Reduction  = 0%
+```
 
 ---
 
-## System Parameters Setup (Baseline Configuration)
+## How To Run
 
-The simulation framework initializes with the following default parameters in OTFS_sample_code.m:
+Open MATLAB in the project folder and run:
 
-| Parameter | Symbol | Default Value | Description |
-| :--- | :--- | :--- | :--- |
-| **Doppler Bins** | N | 10 | Number of bins in Doppler domain |
-| **Delay Bins** | M | 12 | Number of bins in Delay domain |
-| **Simulated Frames**| N_fram | 500 | Total Monte Carlo simulation blocks |
-| **SNR Range** | EbN0_dB| 5:5:30 dB | Evaluated signal-to-noise ratios |
-| **IM Sub-block Size**| n | 6 | Total sub-carriers per localized block |
-| **Active Carriers** | k | 3 | Activated sub-carriers per block (b1 = 4 bits) |
-| **Modulation Order** | M_mod | 4 | 4-QAM / QPSK constellation deployment |
+```matlab
+OTFS_sample_code
+```
+
+The script will:
+
+1. Load system parameters from `config/config_otfs_im.m`.
+2. Select the OHD activation-pattern table.
+3. Run baseline OTFS simulation.
+4. Run OTFS-IM simulation.
+5. Print BER/index/symbol/PER results.
+6. Generate report figures.
+
+---
+
+## Project Structure
+
+```text
+OTFS_sample_code.m
+config/
+  config_otfs_im.m
+pattern_selection/
+  select_patterns_ohd.m
+  evaluate_pattern_table.m
+simulation/
+  simulate_baseline_otfs.m
+  simulate_otfs_im.m
+reporting/
+  print_pattern_info.m
+  print_ohd_results.m
+  plot_ohd_results.m
+utils/
+  gray_to_bin_idx.m
+OTFS_modulation.m
+OTFS_demodulation.m
+OTFS_channel_gen.m
+OTFS_channel_output.m
+OTFS_mp_detector.m
+```
+
+### Main Files
+
+- `OTFS_sample_code.m`  
+  Main runner. It compares conventional OTFS with OHD-selected OTFS-IM.
+
+- `config/config_otfs_im.m`  
+  Stores all simulation parameters, including grid size, frame count, Eb/N0
+  range, modulation order, IM block size, spectral efficiency, and noise power.
+
+- `pattern_selection/select_patterns_ohd.m`  
+  Deterministically selects the activation-pattern table by maximizing the
+  minimum pairwise Hamming distance among selected constant-weight patterns.
+
+- `simulation/simulate_baseline_otfs.m`  
+  Runs the conventional OTFS BER simulation.
+
+- `simulation/simulate_otfs_im.m`  
+  Runs OTFS-IM BER simulation. The receiver uses MP output probabilities and
+  performs block-wise joint MAP decision over valid OHD patterns and QAM symbol
+  combinations.
+
+- `reporting/plot_ohd_results.m`  
+  Generates BER, error-component, pattern-table, Hamming-matrix, carrier-usage,
+  and BER-SE trade-off figures.
+
+---
+
+## Output Figures
+
+The reporting step generates:
+
+- OTFS vs OHD OTFS-IM BER curve
+- OTFS-IM total/index/symbol/pattern error curves
+- OHD selected pattern table heatmap
+- OHD Hamming distance matrix
+- Carrier usage bar chart
+- BER-SE trade-off at the Eb/N0 point closest to 10 dB
+
+---
+
+## Notes On Randomness
+
+The OHD pattern selection is deterministic.
+
+Randomness is only used for Monte Carlo simulation:
+
+- random information bits,
+- random Doppler taps/channel coefficients,
+- AWGN noise.
+
+Seeds are fixed in `config/config_otfs_im.m`:
+
+```matlab
+cfg.rng_seed = 1;
+cfg.rng_seed_baseline = 11;
+cfg.rng_seed_im_compare = 22;
+```
+
+This keeps repeated runs reproducible unless the configuration is changed.
+
+---
+
+## Requirements
+
+- MATLAB
+- Communications Toolbox for `qammod`, `qamdemod`, `bi2de`, and `de2bi`
 
