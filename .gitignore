@@ -21,3 +21,6 @@ results/
 # Built report PDFs are generated artifacts
 ĐATN/main.pdf
 ĐATN/readme.pdf
+
+# Local thesis/report workspace
+ĐATN/
