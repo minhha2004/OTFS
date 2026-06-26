@@ -1,0 +1,43 @@
+\section*{\shortstack[c]{CHAPTER 5. SIMULATION RESULTS AND PERFORMANCE\\[0.18cm]EVALUATION}}
+\addcontentsline{toc}{section}{CHAPTER 5. SIMULATION RESULTS AND PERFORMANCE EVALUATION}
+
+% =========================================================
+% Numbering for Chapter 5
+% =========================================================
+\setcounter{section}{5}
+\setcounter{subsection}{0}
+\setcounter{subsubsection}{0}
+\setcounter{figure}{0}
+\setcounter{table}{0}
+\setcounter{equation}{0}
+
+\renewcommand{\thefigure}{5.\arabic{figure}}
+\renewcommand{\thetable}{5.\arabic{table}}
+\renewcommand{\theequation}{5.\arabic{equation}}
+\renewcommand{\theHfigure}{5.\arabic{figure}}
+\renewcommand{\theHtable}{5.\arabic{table}}
+\renewcommand{\theHequation}{5.\arabic{equation}}
+
+% =========================================================
+% Chapter Introduction
+% =========================================================
+This chapter evaluates the baseline OFDM-LMMSE system, the baseline OTFS system, and the proposed OTFS-IM schemes under a common delay-Doppler channel simulation framework. The purpose is not only to compare final BER curves, but also to explain how index modulation changes the error structure of the receiver. Therefore, the results are organized from general BER comparison to equal-spectral-efficiency analysis, error decomposition, pattern-selection validation, and finally BER-SE trade-off across several \((n,k)\) configurations. This structure follows the design logic of Chapters 3 and 4 and is consistent with previous studies showing that OTFS detection and OTFS-IM performance depend jointly on channel sparsity, detector reliability, and activation-pattern design~\cite{Raviteja2018OTFSMP,Wu2024OTFSIMDetector,Liang2020OTFSIM}.
+
+% =========================================================
+% Chapter Sections
+% =========================================================
+\input{Chapters/Chapter5/5_1_Simulation_Setup_and_Evaluation_Metrics}
+
+\input{Chapters/Chapter5/5_2_Baseline_BER_Performance_Comparison}
+
+\input{Chapters/Chapter5/5_3_Equal_Spectral_Efficiency_OTFS_IM_Results}
+
+\input{Chapters/Chapter5/5_4_OTFS_IM_Error_Decomposition}
+
+\input{Chapters/Chapter5/5_5_Pattern_Selection_Validation}
+
+\input{Chapters/Chapter5/5_6_BER_SE_Tradeoff_Across_Configurations}
+
+\input{Chapters/Chapter5/5_7_Design_Insights_and_Chapter_Summary}
+
+\newpage

@@ -1,3 +1,5 @@
+% Evaluation role: alternative detector research code kept for reference.
+% The current thesis evaluation path uses OTFS_mp_detector instead.
 function [x_est, p_final] = UAMP(y, H, maxIte)
 [U, D, V] = svd(H);
 H1 = D*V';

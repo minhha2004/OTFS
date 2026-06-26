@@ -1,3 +1,6 @@
+% Evaluation role: core OTFS-IM simulation. It produces total BER plus
+% index BER, symbol BER, pattern error rate, and true-pattern rank so the
+% thesis can explain why OHD affects performance.
 function result = simulate_otfs_im(cfg, MAP_TABLE)
 % Runs the OTFS-IM Monte Carlo simulation for one supplied pattern table.
 % It also computes index-detector diagnostics: pattern error rate,
@@ -8,10 +11,13 @@ err_idx_bits = zeros(length(cfg.EbN0_dB), 1);
 err_sym_bits = zeros(length(cfg.EbN0_dB), 1);
 err_pattern = zeros(length(cfg.EbN0_dB), 1);
 rank_sum = zeros(length(cfg.EbN0_dB), 1);
+frames_used = zeros(length(cfg.EbN0_dB), 1);
 symbol_combos = symbol_index_combinations(cfg.M_mod_im, cfg.k);
 
 for iesn0 = 1:length(cfg.EbN0_dB)
-    for ifram = 1:cfg.N_fram
+    target_frames = get_target_frames(cfg);
+
+    for ifram = 1:target_frames
         bits_im = randi([0,1], cfg.lambda, 1);
         x_vec = zeros(cfg.N_total, 1);
         ptr = 1;
@@ -83,6 +89,11 @@ for iesn0 = 1:length(cfg.EbN0_dB)
         end
 
         err_im(iesn0) = sum(xor(bits_im, bits_rx)) + err_im(iesn0);
+        frames_used(iesn0) = ifram;
+
+        if should_stop_adaptive(cfg, ifram, err_im(iesn0))
+            break;
+        end
     end
 end
 
@@ -91,11 +102,29 @@ result.err_idx_bits = err_idx_bits;
 result.err_sym_bits = err_sym_bits;
 result.err_pattern = err_pattern;
 result.rank_sum = rank_sum;
-result.ber_im = err_im / (cfg.lambda * cfg.N_fram);
-result.ber_idx = err_idx_bits / (cfg.g * cfg.b1 * cfg.N_fram);
-result.ber_sym = err_sym_bits / (cfg.g * cfg.b2 * cfg.N_fram);
-result.per_pattern = err_pattern / (cfg.g * cfg.N_fram);
-result.avg_true_rank = rank_sum / (cfg.g * cfg.N_fram);
+result.frames_used = frames_used;
+result.ber_im = err_im ./ (cfg.lambda * frames_used);
+result.ber_idx = err_idx_bits ./ (cfg.g * cfg.b1 * frames_used);
+result.ber_sym = err_sym_bits ./ (cfg.g * cfg.b2 * frames_used);
+result.per_pattern = err_pattern ./ (cfg.g * frames_used);
+result.avg_true_rank = rank_sum ./ (cfg.g * frames_used);
+end
+
+function target_frames = get_target_frames(cfg)
+if isfield(cfg, 'use_adaptive_frames') && cfg.use_adaptive_frames
+    target_frames = cfg.max_frames_per_snr;
+else
+    target_frames = cfg.N_fram;
+end
+end
+
+function tf = should_stop_adaptive(cfg, frames_done, error_count)
+tf = false;
+if ~isfield(cfg, 'use_adaptive_frames') || ~cfg.use_adaptive_frames
+    return;
+end
+
+tf = frames_done >= cfg.min_frames_per_snr && error_count >= cfg.target_bit_errors;
 end
 
 function combos = symbol_index_combinations(M_mod, k)

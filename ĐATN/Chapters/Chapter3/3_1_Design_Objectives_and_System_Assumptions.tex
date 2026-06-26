@@ -1,0 +1,131 @@
+\subsection{Design Objectives and System Assumptions}
+
+This section defines the design objectives, system configuration, and main assumptions of the baseline OTFS system used in this thesis. The baseline system is designed as the reference model for the OTFS-IM extension in Chapter 4 and for the numerical comparison in Chapter 5. Therefore, the model must be detailed enough to represent the essential OTFS transmission mechanism, while remaining sufficiently controlled so that the effects of index modulation and pattern selection can be evaluated clearly.
+
+\subsubsection{Design Objectives}
+
+The first objective of the baseline OTFS system is to establish a complete end-to-end transmission chain operating through the delay-Doppler domain. Unlike OFDM, where information symbols are directly arranged in the time-frequency domain, OTFS places data symbols on a two-dimensional delay-Doppler grid before transforming them for transmission. This structure allows the channel effects caused by multipath delay and Doppler shift to be represented more explicitly in the signal model.
+
+The second objective is to provide a fair reference for the OTFS-IM system developed later in this thesis. Since OTFS-IM changes the way information bits are mapped onto the delay-Doppler grid, its performance must be evaluated against a conventional OTFS baseline using the same frame dimensions, modulation order, channel model, noise definition, and detector assumptions. This makes it possible to determine whether the observed performance difference comes from the index-modulation structure and pattern design, rather than from inconsistent simulation settings.
+
+The third objective is to define the receiver structure used as the foundation for later detection analysis. In this thesis, the baseline OTFS receiver uses a message passing detector. This detector is suitable for sparse delay-Doppler channel structures and provides a natural basis for the OTFS-IM receiver, where both QAM symbols and active-position patterns must be detected. Therefore, the baseline OTFS model is not only a comparison curve in the BER results, but also the starting point for the receiver design in the proposed OTFS-IM framework.
+
+\subsubsection{Delay-Doppler Grid and Frame Structure}
+
+The baseline OTFS frame is constructed on a two-dimensional delay-Doppler grid with \(N\) Doppler bins and \(M\) delay bins. The transmitted delay-Doppler symbol matrix is denoted as
+\begin{equation}
+    \mathbf{x}_{\mathrm{DD}}
+    =
+    [x[k,l]]
+    \in \mathbb{C}^{N \times M},
+\end{equation}
+where \(k\) is the Doppler index and \(l\) is the delay index. The element \(x[k,l]\) represents the QAM information symbol placed at the \(k\)-th Doppler bin and the \(l\)-th delay bin.
+
+In the baseline OTFS system, all delay-Doppler resource elements are active. Hence, each frame contains
+\begin{equation}
+    N_{\mathrm{RE}} = MN
+\end{equation}
+resource elements, and each resource element carries one QAM symbol. This is different from the OTFS-IM system introduced in Chapter 4, where only a subset of positions in each index-modulation block is active and the activation pattern itself also conveys information.
+
+If the QAM modulation order is denoted by \(M_{\mathrm{QAM}}\), then each QAM symbol carries
+\begin{equation}
+    b_{\mathrm{QAM}} = \log_2(M_{\mathrm{QAM}})
+\end{equation}
+information bits. Therefore, the total number of information bits transmitted in one baseline OTFS frame is
+\begin{equation}
+    B_{\mathrm{OTFS}} = MN \log_2(M_{\mathrm{QAM}}).
+\end{equation}
+The corresponding spectral efficiency, measured in bits per delay-Doppler resource element, is
+\begin{equation}
+    \eta_{\mathrm{OTFS}}
+    =
+    \frac{B_{\mathrm{OTFS}}}{MN}
+    =
+    \log_2(M_{\mathrm{QAM}}).
+\end{equation}
+
+For the numerical simulations in this thesis, the baseline OTFS system uses 4-QAM modulation. Thus,
+\begin{equation}
+    M_{\mathrm{QAM}} = 4,
+    \qquad
+    b_{\mathrm{QAM}} = 2.
+\end{equation}
+The baseline spectral efficiency is therefore
+\begin{equation}
+    \eta_{\mathrm{OTFS}} = 2
+    \quad \text{bits/resource element}.
+\end{equation}
+
+The selected OTFS grid size is
+\begin{equation}
+    N = 10, \qquad M = 12,
+\end{equation}
+which gives
+\begin{equation}
+    MN = 120
+\end{equation}
+delay-Doppler resource elements per frame. Since 4-QAM is used, the number of information bits transmitted in one baseline OTFS frame is
+\begin{equation}
+    B_{\mathrm{OTFS}} = 120 \times 2 = 240
+    \quad \text{bits/frame}.
+\end{equation}
+
+The main simulation parameters of the baseline OTFS system are summarized in Table~\ref{tab:baseline_otfs_parameters}. This table is placed here because these parameters are repeatedly used in the transmitter design, receiver design, and performance evaluation sections.
+
+\begin{table}[H]
+    \centering
+    \caption{Baseline OTFS simulation parameters}
+    \label{tab:baseline_otfs_parameters}
+    \begin{tabular}{c c c}
+        \hline
+        Parameter & Symbol & Value \\
+        \hline
+        Number of Doppler bins & \(N\) & 10 \\
+        Number of delay bins & \(M\) & 12 \\
+        Resource elements per frame & \(MN\) & 120 \\
+        QAM modulation order & \(M_{\mathrm{QAM}}\) & 4-QAM \\
+        Bits per QAM symbol & \(b_{\mathrm{QAM}}\) & 2 \\
+        Baseline spectral efficiency & \(\eta_{\mathrm{OTFS}}\) & 2 bits/resource element \\
+        Information bits per OTFS frame & \(B_{\mathrm{OTFS}}\) & 240 bits \\
+        \(E_b/N_0\) range & \(E_b/N_0\) & 0:5:20 dB \\
+        OTFS Monte Carlo frames & \(N_{\mathrm{fram}}\) & 1000 \\
+        OFDM-LMMSE Monte Carlo frames & \(N_{\mathrm{fram,OFDM}}\) & 1000 \\
+        \hline
+    \end{tabular}
+\end{table}
+
+The selected grid size provides a compact simulation setting that keeps the Monte Carlo evaluation computationally feasible. This is important because the thesis later evaluates multiple OTFS-IM configurations and pattern-selection methods under the same channel and noise conditions. The same delay-Doppler frame dimensions are also used as the reference grid for OTFS-IM, so that performance differences can be interpreted in terms of modulation structure and receiver behavior rather than different frame sizes.
+
+\subsubsection{Transceiver Assumptions}
+
+The system considered in this thesis is a single-input single-output transmission system. This assumption keeps the focus on the modulation structure, channel effect, and receiver detection process. Although multi-antenna transmission is important for practical wireless systems, including MIMO processing would introduce additional spatial-domain operations that are outside the main scope of this work.
+
+Perfect timing and frequency synchronization are assumed at the receiver. Under this assumption, the received OTFS frame can be demodulated without additional synchronization errors. This choice is suitable for the baseline design because synchronization impairments would introduce another source of degradation and make it more difficult to isolate the effects of OTFS modulation and OTFS-IM pattern selection.
+
+The receiver is also assumed to have access to the channel parameters required by the detector. In other words, the detection process is evaluated under a perfect-CSI assumption. This does not imply that channel estimation is unimportant in practical OTFS systems. Rather, channel estimation is excluded so that the thesis can focus on modulation, index-pattern design, and detection reliability under controlled conditions.
+
+\subsubsection{Channel Assumptions}
+
+The wireless channel is modeled as a time-varying multipath Rayleigh fading channel in the delay-Doppler domain. Each propagation path is represented by a delay tap, a Doppler tap, and a complex fading coefficient. The delay tap models the propagation delay of a multipath component, while the Doppler tap represents the time variation induced by relative motion or dynamic scattering in the propagation environment.
+
+The complex path coefficients are generated as complex Gaussian random variables with delay-dependent power scaling. As a result, the channel amplitudes follow a Rayleigh fading behavior. Additive white Gaussian noise is then added after the multipath channel. This model allows the simulation to capture the combined effects of multipath fading, delay spread, Doppler spread, and thermal noise.
+
+In this thesis, the Doppler shifts are represented by normalized discrete Doppler taps on the OTFS grid. Therefore, the channel captures Doppler-induced time selectivity without assigning a specific physical velocity in kilometres per hour. This modeling choice is appropriate for the objective of the thesis, which is to evaluate OFDM, OTFS, and OTFS-IM under a common high-Doppler delay-Doppler fading condition, rather than to reproduce a standardized vehicular channel model.
+
+This assumption should be interpreted carefully. The simulated channel represents the main impairment associated with high-mobility communication, namely Doppler-induced time variation. However, it is not claimed to correspond exactly to a particular vehicle speed. For this reason, the channel is described as a high-Doppler or mobility-like delay-Doppler fading channel in the simulation discussion.
+
+\subsubsection{Fairness Criteria for Comparison}
+
+A key requirement of the simulation framework is fairness. The OFDM, OTFS, and OTFS-IM systems are evaluated over the same \(E_b/N_0\) range and under the same channel generation mechanism. This ensures that the performance differences observed in Chapter 5 mainly arise from the modulation and detection structures, rather than from inconsistent channel or noise assumptions.
+
+The OFDM reference used in this thesis is denoted as OFDM-LMMSE. It uses a full-frame linear minimum mean square error equalizer with channel knowledge. This makes the OFDM baseline stronger and more meaningful than a simple one-tap OFDM receiver in a time-varying channel. Therefore, any gain achieved by OTFS or OTFS-IM is compared against an OFDM receiver that already includes explicit equalization.
+
+For the OTFS baseline, the same channel realization style and noise definition are used. The receiver uses a message passing detector, which is suitable for sparse delay-Doppler channel structures. In Chapter 4, the OTFS-IM receiver builds on this detection framework by using probability information to identify both QAM symbols and activation patterns.
+
+Spectral efficiency is also considered when interpreting the results. Since the baseline OTFS system with 4-QAM has a spectral efficiency of \(2\) bits/resource element, OTFS-IM configurations with the same value are treated as rate-fair comparisons. Configurations with lower spectral efficiency are interpreted as reliability-oriented cases, where reduced rate is exchanged for improved BER performance. This distinction is important because OTFS-IM does not automatically outperform OTFS in every configuration; its advantage depends on the trade-off among spectral efficiency, pattern detection reliability, and symbol detection accuracy.
+
+\subsubsection{Scope of the Baseline Model}
+
+The baseline OTFS model is intentionally compact and controlled. It does not include channel coding, channel estimation error, synchronization offset, MIMO transmission, or standardized 5G channel profiles. These components are important in practical systems, but including all of them would make it harder to isolate the contribution of OTFS-IM activation-pattern design.
+
+The role of the baseline model is therefore to provide a clean and consistent reference system. It defines the delay-Doppler frame, the modulation format, the channel assumptions, and the receiver detection structure used throughout the thesis. Based on this baseline, Chapter 4 introduces index modulation into the OTFS grid and studies how activation-pattern design affects index BER, symbol BER, pattern error rate, and total BER.

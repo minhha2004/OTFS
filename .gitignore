@@ -1,0 +1,23 @@
+.DS_Store
+*.asv
+*.fig
+
+# MATLAB simulation outputs
+results/
+
+# LaTeX build artifacts
+*.aux
+*.bbl
+*.blg
+*.fdb_latexmk
+*.fls
+*.lof
+*.log
+*.lot
+*.out
+*.synctex.gz
+*.toc
+
+# Built report PDFs are generated artifacts
+ĐATN/main.pdf
+ĐATN/readme.pdf

@@ -1,3 +1,5 @@
+% Evaluation role: OTFS receiver front-end used before MP detection. It maps
+% the received waveform back to the delay-Doppler grid for BER analysis.
 %
 % Copyright (c) 2018, Raviteja Patchava, Yi Hong, and Emanuele Viterbo, Monash University
 % All rights reserved.

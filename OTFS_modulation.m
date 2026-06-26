@@ -1,3 +1,5 @@
+% Evaluation role: OTFS transmitter block used by both baseline OTFS and
+% OTFS-IM. It provides the modulation path needed for fair BER comparison.
 %
 % Copyright (c) 2018, Raviteja Patchava, Yi Hong, and Emanuele Viterbo, Monash University
 % All rights reserved.

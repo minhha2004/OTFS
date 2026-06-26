@@ -1,0 +1,196 @@
+\subsection{Index Modulation Block and Spectral Efficiency}
+
+This section defines the OTFS-IM block structure used in the thesis and relates the mathematical parameters to the simulation model. Unlike Chapter 2, where IM was introduced as a general principle, this section focuses on how index modulation is embedded into the \(N \times M\) delay-Doppler grid of the implemented OTFS-IM system.
+
+\subsubsection{Delay-Doppler IM Block Structure}
+
+In the baseline OTFS system, all \(NM\) delay-Doppler resource elements are occupied by QAM symbols. In OTFS-IM, the same delay-Doppler frame is divided into smaller index-modulation blocks. Each block contains \(n\) delay-Doppler positions, of which only \(k\) positions are active. The remaining \(n-k\) positions are set to zero and are interpreted as inactive positions.
+
+Let \(N\) denote the number of Doppler bins and \(M\) denote the number of delay bins. The total number of delay-Doppler resource elements in one OTFS frame is
+\begin{equation}
+    N_{\mathrm{total}} = NM .
+\end{equation}
+The OTFS-IM block size \(n\) is chosen such that it divides \(NM\), so that the frame can be partitioned into an integer number of IM blocks. The number of IM blocks per OTFS frame is therefore
+\begin{equation}
+    g = \frac{NM}{n}.
+    \label{eq:otfs_im_num_blocks}
+\end{equation}
+The block partitioning is applied to the vectorized delay-Doppler grid. The transmit vector \(\mathbf{x}_{\mathrm{vec}}\) has length \(NM\). For the \(i\)-th IM block, the positions from \((i-1)n+1\) to \(in\) form one local activation block. The active positions inside this block are determined by the selected activation pattern, while all inactive positions remain zero.
+
+This block-wise construction is important for two reasons. First, it defines how the input bit sequence is mapped to the delay-Doppler grid. Second, it limits the receiver search to a small block rather than the entire OTFS frame. Without this block structure, detecting the active-position pattern over all \(NM\) resource elements would be computationally impractical.
+
+\subsubsection{Bit Partitioning and Activation Patterns}
+
+Each OTFS-IM block carries information in two parts. The first part is represented by the activation pattern, and the second part is represented by QAM symbols transmitted on the active positions. For a block with \(n\) available positions and \(k\) active positions, the number of possible constant-weight activation patterns is \(\binom{n}{k}\). Since binary mapping requires a power-of-two number of labels, the number of index bits per block is
+\begin{equation}
+    b_1 =
+    \left\lfloor
+    \log_2 \binom{n}{k}
+    \right\rfloor .
+    \label{eq:otfs_im_index_bits}
+\end{equation}
+Only \(2^{b_1}\) patterns are selected and stored in the activation-pattern table, denoted by \(\mathcal{P}\). This table will be discussed in more detail in Section 4.3.
+
+The second part of each block consists of QAM symbol bits. Since only \(k\) positions are active and each active position carries one \(M_{\mathrm{mod}}\)-ary QAM symbol, the number of QAM symbol bits per IM block is
+\begin{equation}
+    b_2 = k\log_2(M_{\mathrm{mod}}).
+    \label{eq:otfs_im_symbol_bits}
+\end{equation}
+In this thesis, \(M_{\mathrm{mod}}=4\), so each active resource element carries two QAM bits.
+
+Therefore, the total number of information bits per OTFS-IM block is
+\begin{equation}
+    b_{\mathrm{block}} = b_1 + b_2.
+    \label{eq:otfs_im_bits_per_block}
+\end{equation}
+For one full OTFS-IM frame, the total number of transmitted bits is
+\begin{equation}
+    \lambda = g(b_1+b_2).
+    \label{eq:otfs_im_total_bits}
+\end{equation}
+For each OTFS-IM frame, a binary vector of length \(\lambda\) is generated. The receiver reconstructs a vector of the same length after block-wise pattern and symbol detection.
+
+Table~\ref{tab:otfs_im_parameters} summarizes the main OTFS-IM block parameters used in the simulation. This table is useful because Chapter 5 changes \((n,k)\) to compare different spectral-efficiency and reliability trade-offs.
+
+\begin{table}[H]
+\centering
+\caption{Main OTFS-IM block parameters used in the simulation.}
+\label{tab:otfs_im_parameters}
+\begin{tabularx}{0.95\linewidth}{|c|c|X|}
+\hline
+\textbf{Symbol} & \textbf{Simulation parameter} & \textbf{Meaning} \\
+\hline
+\(N\) & Doppler-bin count & Number of Doppler bins in one OTFS frame. \\
+\hline
+\(M\) & Delay-bin count & Number of delay bins in one OTFS frame. \\
+\hline
+\(NM\) & Total DD resources & Total number of delay-Doppler resource elements. \\
+\hline
+\(n\) & IM block length & Number of resource elements in one IM block. \\
+\hline
+\(k\) & Active positions per block & Number of active resource elements in one IM block. \\
+\hline
+\(g\) & Number of IM blocks & Number of IM blocks per OTFS frame. \\
+\hline
+\(b_1\) & Index-bit count & Number of index bits per IM block. \\
+\hline
+\(b_2\) & Symbol-bit count & Number of QAM symbol bits per IM block. \\
+\hline
+\(\lambda\) & Frame bit length & Total number of transmitted bits per OTFS-IM frame. \\
+\hline
+\end{tabularx}
+\end{table}
+
+\subsubsection{Spectral Efficiency and Power Normalization}
+
+The spectral efficiency of the baseline OTFS system is straightforward because every delay-Doppler resource element carries one QAM symbol. With \(M_{\mathrm{mod}}\)-ary QAM, the baseline OTFS spectral efficiency is
+\begin{equation}
+    \eta_{\mathrm{OTFS}} = \log_2(M_{\mathrm{mod}}).
+    \label{eq:otfs_baseline_se}
+\end{equation}
+For 4-QAM, \(\eta_{\mathrm{OTFS}} = 2\) bits per delay-Doppler resource element.
+
+For OTFS-IM, the spectral efficiency is determined by the number of transmitted bits per frame divided by the number of delay-Doppler resource elements:
+\begin{equation}
+    \eta_{\mathrm{IM}}
+    =
+    \frac{\lambda}{NM}
+    =
+    \frac{g(b_1+b_2)}{NM}.
+    \label{eq:otfs_im_se_frame}
+\end{equation}
+Using \(g = NM/n\), this can also be written as
+\begin{equation}
+    \eta_{\mathrm{IM}}
+    =
+    \frac{b_1+b_2}{n}
+    =
+    \frac{
+    \left\lfloor \log_2 \binom{n}{k} \right\rfloor
+    +
+    k\log_2(M_{\mathrm{mod}})
+    }{n}.
+    \label{eq:otfs_im_se_block}
+\end{equation}
+This expression is the spectral-efficiency value used to compare different OTFS-IM configurations.
+
+Power normalization is also required because only \(k\) out of \(n\) positions are active in each IM block. If the active QAM symbols were transmitted without scaling, the average block energy would decrease simply because some positions are set to zero. To keep the energy comparison controlled, the active symbols are scaled by
+\begin{equation}
+    \alpha = \sqrt{\frac{n}{k}}.
+    \label{eq:otfs_im_alpha}
+\end{equation}
+In the transmitter, the QAM symbols on active positions are multiplied by \(\alpha\). At the receiver, the demodulated delay-Doppler grid is divided by \(\alpha\), and the noise variance used by the detector is adjusted by \(\alpha^2\).
+
+The normalization does not remove the detection difficulty of OTFS-IM. The receiver still has to distinguish active and inactive positions under noise and channel interference. Rather, the purpose of \(\alpha\) is to prevent the BER comparison from being dominated by a trivial transmit-energy mismatch between OTFS and OTFS-IM.
+
+\subsubsection{Rate-Fair and Reliability-Oriented Configurations}
+
+The choice of \(n\) and \(k\) determines the operating point of the OTFS-IM system. A configuration is considered rate-fair with the baseline OTFS system when
+\begin{equation}
+    \eta_{\mathrm{IM}} = \eta_{\mathrm{OTFS}}.
+\end{equation}
+Under this condition, BER curves can be compared directly because both systems transmit the same number of bits per delay-Doppler resource element.
+
+For example, with 4-QAM and \((n,k)=(4,3)\),
+\begin{equation}
+    b_1 = \left\lfloor \log_2 \binom{4}{3} \right\rfloor = 2,
+    \qquad
+    b_2 = 3\log_2(4)=6,
+\end{equation}
+so that
+\begin{equation}
+    \eta_{\mathrm{IM}} = \frac{2+6}{4}=2
+    \ \text{bits/resource element}.
+\end{equation}
+This is equal to the baseline OTFS spectral efficiency with 4-QAM.
+
+Another useful equal-rate example is \((n,k)=(5,4)\). In this case,
+\begin{equation}
+    b_1 = \left\lfloor \log_2 \binom{5}{4} \right\rfloor = 2,
+    \qquad
+    b_2 = 4\log_2(4)=8,
+\end{equation}
+and therefore
+\begin{equation}
+    \eta_{\mathrm{IM}} = \frac{2+8}{5}=2
+    \ \text{bits/resource element}.
+\end{equation}
+This configuration is also consistent with the common IM design guideline that, for low-order modulation, the number of active positions should be a large fraction of the block size when spectral efficiency is the priority.
+
+In contrast, configurations such as \((n,k)=(4,2)\) have lower spectral efficiency:
+\begin{equation}
+    b_1 = \left\lfloor \log_2 \binom{4}{2} \right\rfloor = 2,
+    \qquad
+    b_2 = 2\log_2(4)=4,
+\end{equation}
+which gives
+\begin{equation}
+    \eta_{\mathrm{IM}} = \frac{2+4}{4}=1.5
+    \ \text{bits/resource element}.
+\end{equation}
+Such a configuration should not be interpreted as a direct rate-fair BER comparison against baseline OTFS. Instead, it represents a reliability-oriented operating point where the system sacrifices spectral efficiency in exchange for a potentially easier detection problem.
+
+Table~\ref{tab:otfs_im_config_examples} lists representative OTFS-IM configurations used or considered in the simulation study. The table also indicates how the corresponding results should be interpreted.
+
+\begin{table}[H]
+\centering
+\caption{Representative OTFS-IM configurations and interpretation.}
+\label{tab:otfs_im_config_examples}
+\begin{tabular}{|c|c|c|c|c|}
+\hline
+\(\boldsymbol{n}\) & \(\boldsymbol{k}\) & \(\boldsymbol{b_1}\) & \(\boldsymbol{\eta_{\mathrm{IM}}}\) & \textbf{Interpretation} \\
+\hline
+4 & 2 & 2 & 1.50 & Reliability-oriented lower-rate case \\
+\hline
+4 & 3 & 2 & 2.00 & Rate-fair comparison with 4-QAM OTFS \\
+\hline
+5 & 4 & 2 & 2.00 & Rate-fair comparison with high active ratio \\
+\hline
+6 & 4 & 3 & 1.83 & Supplementary BER-SE trade-off case \\
+\hline
+6 & 5 & 2 & 2.00 & Rate-fair high-active-ratio validation \\
+\hline
+\end{tabular}
+\end{table}
+
+The selected configurations therefore serve different purposes. Rate-fair configurations are used to compare OTFS and OTFS-IM under the same spectral efficiency. Lower-rate configurations are useful for studying whether reducing the number of active positions improves the reliability of pattern and symbol detection. This distinction is carried into Chapter 5, where BER, index BER, symbol BER, and pattern error rate are interpreted together rather than relying on total BER alone.

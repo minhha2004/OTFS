@@ -1,0 +1,125 @@
+\section*{CHAPTER 6. CONCLUSION AND FUTURE WORK}
+\addcontentsline{toc}{section}{CHAPTER 6. CONCLUSION AND FUTURE WORK}
+
+% =========================================================
+% Numbering for Chapter 6
+% =========================================================
+\setcounter{section}{6}
+\setcounter{subsection}{0}
+\setcounter{subsubsection}{0}
+\setcounter{figure}{0}
+\setcounter{table}{0}
+\setcounter{equation}{0}
+
+\renewcommand{\thefigure}{6.\arabic{figure}}
+\renewcommand{\thetable}{6.\arabic{table}}
+\renewcommand{\theequation}{6.\arabic{equation}}
+\renewcommand{\theHfigure}{6.\arabic{figure}}
+\renewcommand{\theHtable}{6.\arabic{table}}
+\renewcommand{\theHequation}{6.\arabic{equation}}
+
+% =========================================================
+% Chapter Introduction
+% =========================================================
+This chapter concludes the thesis by summarizing the main contributions, key simulation findings, remaining limitations, and possible future extensions. The work has focused on the design and performance evaluation of OTFS with index modulation for high-mobility-oriented delay-Doppler channels, with particular attention to BER performance, spectral-efficiency trade-offs, and activation-pattern selection.
+
+% =========================================================
+% Chapter Sections
+% =========================================================
+\subsection{Main Contributions}
+
+The first contribution of this thesis is the construction of a complete baseline OTFS simulation framework. The system includes delay-Doppler-domain symbol placement, OTFS modulation and demodulation, a discrete delay-Doppler channel model with multipath delay and Doppler taps, AWGN addition, and MP-based detection. This framework provides the reference system used to evaluate the behavior of OTFS under a doubly selective channel and also serves as the foundation for the OTFS-IM extension.
+
+The second contribution is the implementation of an OTFS-IM transmission and reception structure. Instead of activating all delay-Doppler resource elements as in conventional OTFS, the OTFS-IM system divides the grid into IM blocks and transmits information through both QAM symbols and active-position indices. This design makes it possible to study how index modulation changes the BER behavior and spectral-efficiency trade-off of the baseline OTFS system.
+
+The third contribution is the integration of structured activation-pattern selection into the OTFS-IM system. The OHD method is used to select pattern tables with large Hamming-distance separation between activation patterns, while the proposed B-OHD refinement additionally considers carrier-usage balance. This allows the thesis to evaluate not only whether OTFS-IM improves over OTFS, but also whether the geometry of the selected activation patterns affects index detection reliability.
+
+The fourth contribution is the inclusion of a random-pattern validation baseline. Random pattern selection is not treated as the proposed method, but as a diagnostic reference. By comparing OHD and B-OHD with random pattern tables, the thesis avoids relying only on idealized deterministic selection and provides a more honest evaluation of whether structured pattern design gives a meaningful advantage.
+
+The final contribution is the simulation-based performance analysis across multiple OTFS-IM configurations. The evaluation considers total BER, index BER, symbol BER, pattern error rate, and BER-SE trade-off. This makes the analysis deeper than a single BER comparison because it separates equal-spectral-efficiency gains from rate-reliability trade-offs and explains when B-OHD improves OHD and when both methods become effectively identical.
+
+\begin{table}[htbp]
+    \centering
+    \footnotesize
+    \caption{Summary of thesis contributions and possible extensions}
+    \label{tab:chapter6_contribution_summary}
+    \renewcommand{\arraystretch}{1.22}
+    \setlength{\tabcolsep}{4pt}
+    \begin{tabularx}{\linewidth}{>{\RaggedRight\arraybackslash}p{0.16\linewidth}
+    >{\RaggedRight\arraybackslash}X
+    >{\RaggedRight\arraybackslash}X
+    >{\RaggedRight\arraybackslash}X}
+        \toprule
+        \textbf{Aspect} & \textbf{Completed in this thesis} & \textbf{Main finding} & \textbf{Possible extension} \\
+        \midrule
+        Baseline OTFS system
+        & Implemented OTFS modulation, demodulation, delay-Doppler channel, AWGN, and MP detection
+        & OTFS is a robust reference under the simulated doubly selective channel
+        & Use standardized velocity-based channel models \\
+        \addlinespace
+        OTFS-IM design
+        & Added block-wise index modulation with active delay-Doppler positions and QAM symbols
+        & BER can improve at equal SE or through a BER-SE trade-off
+        & Study adaptive IM modes for SNR and mobility changes \\
+        \addlinespace
+        Pattern selection
+        & Evaluated OHD and B-OHD activation-pattern selection
+        & B-OHD helps when carrier balancing changes the selected table
+        & Develop channel-aware and detector-aware selection \\
+        \addlinespace
+        Validation baseline
+        & Compared deterministic tables with random-pattern averages
+        & Random tables can be competitive in some configurations
+        & Add larger ensembles and confidence analysis \\
+        \addlinespace
+        Performance evaluation
+        & Analyzed BER, index BER, symbol BER, PER, and BER-SE trade-off
+        & Equal-SE cases give the strongest OTFS-IM evidence
+        & Add coding, soft-output detection, and complexity analysis \\
+        \bottomrule
+    \end{tabularx}
+\end{table}
+
+\subsection{Key Simulation Findings}
+
+The simulation results confirm that OTFS provides a more suitable baseline than OFDM-LMMSE under the considered delay-Doppler channel. The OFDM-LMMSE curve improves with SNR, but its performance degrades more significantly in the presence of Doppler-induced time variation. In contrast, OTFS operates directly with the delay-Doppler representation and shows stronger robustness in the simulated doubly selective environment. This result supports the motivation for using OTFS as the main waveform for high-mobility-oriented communication scenarios.
+
+The OTFS-IM results show that index modulation can further improve the BER performance of baseline OTFS. The improvement is most visible in the medium-to-high-SNR region, where the MP detector becomes sufficiently reliable for both active-position and QAM-symbol decisions. Equal-spectral-efficiency configurations are especially important because they demonstrate that OTFS-IM can improve BER without reducing the nominal spectral efficiency of the baseline OTFS system. The \(n=6,k=5\) configuration is the clearest example in this thesis, as it preserves the same spectral efficiency as baseline OTFS while achieving lower BER in the evaluated SNR range.
+
+The lower-spectral-efficiency configurations also provide useful insight, but they must be interpreted differently. Configurations such as \(n=5,k=3\) reduce the information rate compared with baseline OTFS, so their BER improvement represents a rate-reliability trade-off rather than a strict equal-rate gain. These configurations are still meaningful because a practical system may choose a lower-rate mode when reliability is more important than throughput. However, the analysis must clearly separate these cases from equal-SE comparisons.
+
+The error-decomposition results show that the OTFS-IM BER is determined by both index-bit errors and symbol-bit errors. At moderate SNR, symbol errors still contribute significantly to the total BER, while index errors are strongly related to pattern detection reliability. This means that activation-pattern design alone cannot fully determine system performance. The detector output quality and the QAM-symbol decision reliability remain essential parts of the overall OTFS-IM performance.
+
+The comparison between OHD and B-OHD shows that pattern-selection improvement is configuration-dependent. B-OHD can improve OHD when the original OHD table has an unbalanced usage of active positions, as observed in the \(n=5,k=3\) configuration. In this case, the balancing criterion improves the selected pattern table and leads to better BER behavior at the selected operating points. However, for configurations such as \(n=6,k=5\), OHD and B-OHD may select nearly identical or effectively identical pattern tables, resulting in overlapping BER curves. This confirms that B-OHD is a useful refinement, but not a universally dominant method for every IM configuration.
+
+The random-pattern validation baseline also leads to an important conclusion. Random pattern tables can sometimes perform competitively with deterministic OHD-based tables, especially when the candidate pattern space is small or when several pattern tables have similar distance properties. Therefore, the proposed pattern-selection methods should not be evaluated only against baseline OTFS. They should also be compared with random pattern selection to verify whether the deterministic design truly provides a meaningful advantage. This makes the final evaluation more balanced and avoids overclaiming the benefit of pattern selection.
+
+Overall, the simulation findings indicate that OTFS-IM provides a flexible BER-SE design space. Equal-SE configurations are suitable when the system must preserve throughput, while lower-SE configurations can be used when reliability is prioritized. Pattern selection improves this design space, but its effectiveness depends on the relationship between IM block size, number of active positions, candidate-pattern geometry, and detector reliability.
+
+\subsection{Limitations of the Present Work}
+
+Although the simulation results provide useful evidence for the OTFS-IM design, several limitations remain. The first limitation is that the channel model is represented through discrete delay and Doppler taps rather than a full physical mobility model. This is suitable for studying the behavior of OTFS in a doubly selective delay-Doppler channel, but it does not directly map each simulation case to a specific user velocity, carrier frequency, or Doppler spread in hertz. Therefore, the thesis supports the high-Doppler motivation of OTFS, but a separate velocity-based simulation would be needed to evaluate concrete scenarios such as vehicular, high-speed railway, or UAV communications.
+
+The second limitation is the finite Monte Carlo simulation length. The BER curves are estimated by transmitting a limited number of frames for each SNR point and configuration. This is sufficient to observe the main performance trends, but very small BER values at high SNR may still be affected by statistical variation. As a result, small differences between two close curves should be interpreted carefully, especially when the BER values are already near the lower end of the simulated range.
+
+The third limitation is related to the receiver. The simulations use an MP-based detector, which is suitable for sparse delay-Doppler-domain detection and is consistent with the OTFS receiver structure used in this thesis. However, the detector is not the only possible receiver design. Other approaches such as MMSE-based detection, maximum-likelihood detection for small systems, hybrid detection, or soft-output iterative detection may change the relative performance of OTFS and OTFS-IM. Therefore, the reported gains should be understood as results under the selected MP detection framework.
+
+The fourth limitation concerns pattern selection. OHD and B-OHD are based on activation-pattern geometry, mainly Hamming distance and carrier-usage balance. These criteria are useful because they are simple, interpretable, and independent of a specific instantaneous channel realization. However, they are not fully channel-aware or detector-aware. A pattern table that is geometrically good may not always be optimal after propagation through a particular delay-Doppler channel and detection process. This explains why random pattern tables can sometimes perform competitively and why B-OHD does not improve OHD in every configuration.
+
+The final limitation is computational scalability. Exact OHD pattern search becomes expensive when the IM block size and the number of selected patterns increase. In this thesis, the tested configurations are chosen so that exact or controlled pattern selection remains feasible. For larger OTFS-IM systems, approximate, greedy, or learning-based pattern-selection methods may be required to avoid excessive search complexity.
+
+\subsection{Future Work}
+
+Several future research directions can extend the work presented in this thesis. The first direction is to develop a velocity-based channel simulation. Instead of specifying only discrete Doppler taps, the channel can be parameterized by carrier frequency, subcarrier spacing, mobile speed, maximum Doppler shift, and standardized delay profiles. This would allow the OTFS-IM system to be evaluated under concrete mobility scenarios, such as vehicular communications, high-speed trains, UAV links, and other 5G/6G high-mobility use cases.
+
+The second direction is channel-aware pattern selection. In the present work, OHD and B-OHD select activation patterns based on Hamming distance and carrier-usage balance. A channel-aware design could select or adapt the pattern table according to the delay-Doppler channel structure, path distribution, or position-dependent reliability. Such a method may avoid using active positions that are more vulnerable under a given channel realization and may provide stronger gains than purely geometry-based selection.
+
+The third direction is detector-aware pattern selection. Since the simulation results show that pattern selection and MP detector reliability are closely related, future methods can design the activation table by considering the receiver behavior directly. For example, candidate pattern tables could be evaluated using approximate detection likelihoods, expected index-error probability, or message-passing convergence behavior. This direction is promising because a pattern table that is optimal in Hamming distance is not necessarily optimal after iterative detection.
+
+The fourth direction is to combine OTFS-IM with channel coding and soft-output detection. Coding can reduce both index-bit and symbol-bit errors, while soft-output detectors can provide reliability information to the decoder. This would make the system closer to practical communication standards and may improve the robustness of OTFS-IM in lower-SNR regions where uncoded detection still produces many errors.
+
+The fifth direction is to compare multiple receiver algorithms. The MP detector used in this thesis is suitable for sparse OTFS detection, but future work can compare it with LMMSE, MMSE with interference cancellation, maximum-likelihood detection for small systems, and hybrid low-complexity detectors. Such a comparison would clarify whether the observed OTFS-IM gains are mainly produced by the modulation structure, the detector, or their interaction.
+
+Finally, future work should consider complexity and scalability more deeply. Exact OHD search becomes impractical for large pattern spaces, so approximate or greedy B-OHD methods may be required. The computational cost of pattern selection, modulation, detection, and BER simulation should also be measured more systematically. This would help determine which OTFS-IM configurations are not only strong in BER performance, but also practical for larger delay-Doppler grids and real-time communication systems.
+
+\newpage

@@ -1,3 +1,5 @@
+% Evaluation role: computes pattern-geometry metrics used to explain why
+% OHD-selected activation patterns reduce pattern and index errors.
 function metrics = evaluate_pattern_table(selected_set, BIN_PATS, D)
 % Computes pattern-table diagnostics: pairwise Hamming-distance statistics
 % and how often each carrier position is used by the selected patterns.

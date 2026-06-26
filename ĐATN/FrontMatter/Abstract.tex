@@ -1,0 +1,16 @@
+\section*{ABSTRACT}
+\thispagestyle{plain}
+
+Future sixth-generation (6G) wireless communication systems are expected to support high-mobility applications such as intelligent transportation systems, unmanned aerial vehicles, high-speed railways, and satellite communications. In these scenarios, conventional Orthogonal Frequency Division Multiplexing (OFDM) may suffer from Doppler-induced channel variation and inter-carrier interference. Orthogonal Time Frequency Space (OTFS) modulation has emerged as a promising waveform candidate because it places information in the delay-Doppler domain, where multipath delay and Doppler shifts can be represented more directly.
+
+This thesis investigates the design and performance evaluation of OTFS with Index Modulation (OTFS-IM). A baseline OTFS transceiver is first developed, including delay-Doppler-domain symbol placement, OTFS modulation and demodulation, a discrete delay-Doppler multipath Rayleigh fading channel, additive white Gaussian noise, and message passing detection. The system is then extended to OTFS-IM, where information is conveyed through both QAM constellation symbols and the indices of active positions inside each index-modulation block.
+
+To study the reliability of active-position mapping, this thesis implements structured activation-pattern selection based on Orthogonal Hamming Distance (OHD) and Balanced OHD (B-OHD). The proposed OTFS-IM configurations are evaluated against baseline OTFS, OFDM-LMMSE, and a random-pattern diagnostic reference. MATLAB simulations are conducted over multiple \(E_b/N_0\) values and several \((n,k)\) configurations. The performance analysis includes total bit error rate (BER), index BER, symbol BER, pattern error rate, and BER-spectral-efficiency trade-off.
+
+The simulation results show that OTFS provides stronger robustness than OFDM-LMMSE under the considered high-Doppler delay-Doppler channel model. OTFS-IM can further improve BER in selected configurations, but its advantage must be interpreted together with spectral efficiency. Equal-spectral-efficiency cases provide the strongest evidence of OTFS-IM benefit, while lower-rate configurations mainly represent reliability-oriented operating modes. The results also show that OHD and B-OHD offer interpretable pattern-table design criteria, although their gains depend on the selected \((n,k)\) configuration and may be close to random pattern selection in some cases.
+
+Overall, the thesis provides a complete simulation-based study of OTFS and OTFS-IM under a common delay-Doppler channel framework. The findings highlight the potential of OTFS-IM as a flexible BER-SE design approach for future high-mobility wireless communications, while also identifying important limitations related to channel modeling, detector assumptions, and pattern-selection scalability.
+
+\textbf{Keywords:} Orthogonal Time Frequency Space (OTFS), Index Modulation (IM), OTFS-IM, Delay-Doppler Domain, High-Mobility Communications, Orthogonal Hamming Distance (OHD), Bit Error Rate (BER).
+
+\newpage

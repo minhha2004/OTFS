@@ -1,4 +1,6 @@
-
+% Evaluation role: MP detector used for OTFS and OTFS-IM receiver analysis.
+% Its probability output enables both hard symbol decisions and block-wise
+% MAP index-pattern detection in the OTFS-IM evaluation.
 function [x_est, sum_prob_fin] = OTFS_mp_detector(...
     N,M,M_mod,taps,delay_taps,Doppler_taps,chan_coef,sigma_2,y)
 yv = reshape(y,N*M,1);

@@ -1,3 +1,5 @@
+% Evaluation role: delay-Doppler channel generator shared by OFDM, OTFS, and
+% OTFS-IM so all schemes are compared under the same mobility-style channel.
 %
 % Copyright (c) 2018, Raviteja Patchava, Yi Hong, and Emanuele Viterbo, Monash University
 % All rights reserved.

@@ -1,3 +1,5 @@
+% Evaluation role: applies the common time-varying multipath channel and AWGN
+% to every scheme, keeping Chapter 5 comparisons controlled and fair.
 %
 % Copyright (c) 2018, Raviteja Patchava, Yi Hong, and Emanuele Viterbo, Monash University
 % All rights reserved.
