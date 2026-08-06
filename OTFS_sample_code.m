@@ -1,51 +1,76 @@
-% Evaluation role: main thesis experiment runner. It compares OFDM, OTFS,
-% OHD-selected OTFS-IM, Balanced-OHD, and random-pattern diagnostics so
-% Chapter 5 can analyze BER, index reliability, pattern errors, and SE fairness.
-% Run this once per selected (n,k). After saving 2-3 configurations, use
-% plot_se_ber_tradeoff_from_results to generate the final BER-SE trade-off figure.
+% OTFS_SAMPLE_CODE
+% Đọc cấu hình chung của hệ thống.
+% Tạo ba nhánh OTFS-IM: QPSK, 4-ASK thường và 4-ASK cải tiến.
+% Chạy mô phỏng OTFS gốc và từng nhánh OTFS-IM.
+% In bảng BER, vẽ hình và lưu toàn bộ kết quả vào thư mục results.
 clc; clear; close all; tic;
-addpath(genpath(fileparts(mfilename('fullpath'))));
+project_dir = fileparts(mfilename('fullpath'));
+addpath(genpath(project_dir));
 
-cfg = config_otfs_im();
-rng(cfg.rng_seed);
+cfg = config_full_grid_otfs_im();
+% Tạo nhánh QPSK và bật bộ sửa tối đa hai vị trí active bị chọn sai.
+qpsk_cfg = build_full_grid_variant(cfg, 'Full-grid QPSK-NBC', ...
+    qammod(0:3, 4), 96);
+qpsk_cfg.enable_local_support_refinement = true;
+qpsk_cfg.refinement_boundary_size = 4;
+qpsk_cfg.refinement_max_swaps = 2;
+conventional_ask_alphabet = modified_4ask_alphabet( ...
+    cfg.ask_conventional_ratio, mean(abs(qammod(0:3, 4)).^2));
+conventional_ask_cfg = build_full_grid_variant(cfg, ...
+    'Full-grid Conventional 4-ASK-NBC', conventional_ask_alphabet, 96);
+ask_alphabet = modified_4ask_alphabet(cfg.ask_ratio, ...
+    mean(abs(qammod(0:3, 4)).^2));
+ask_cfg = build_full_grid_variant(cfg, ...
+    sprintf('Full-grid Modified 4-ASK-NBC (ratio %.1f)', cfg.ask_ratio), ...
+    ask_alphabet, 96);
 
-[MAP_TABLE, pattern_info] = select_patterns_ohd(cfg);
-print_pattern_info(pattern_info, sprintf('OHD (n=%d,k=%d)', cfg.n, cfg.k), cfg.print_pattern_tables);
-
-[MAP_TABLE_BAL, balanced_pattern_info] = select_patterns_balanced_ohd(cfg);
-print_pattern_info(balanced_pattern_info, sprintf('B-OHD (n=%d,k=%d)', cfg.n, cfg.k), cfg.print_pattern_tables);
+results_dir = fullfile(project_dir, cfg.results_dir);
+% Tạo thư mục kết quả trước khi bật diary để tránh lỗi không tìm thấy file.
+if ~exist(results_dir, 'dir')
+    [created, message] = mkdir(results_dir);
+    if ~created
+        error('Cannot create results directory "%s": %s', ...
+            results_dir, message);
+    end
+end
+run_tag = char(datetime('now', 'Format', 'yyyyMMdd_HHmmss'));
+console_file = fullfile(results_dir, ...
+    sprintf('full_grid_results_%s.txt', run_tag));
+diary(console_file);
 
 rng(cfg.rng_seed_baseline);
-ofdm_result = simulate_baseline_ofdm(cfg);
-rng(cfg.rng_seed_baseline);
+% Chạy OTFS-QPSK gốc để làm đường tham chiếu.
 otfs_result = simulate_baseline_otfs(cfg);
 
-rng(cfg.rng_seed_im_compare);
-im_result = simulate_otfs_im(cfg, MAP_TABLE);
+rng(cfg.rng_seed_im);
+% Các nhánh IM dùng cùng seed để được so sánh trên cùng chuỗi kênh/ngẫu nhiên.
+qpsk_result = simulate_full_grid_otfs_im(qpsk_cfg);
 
-rng(cfg.rng_seed_im_compare);
-balanced_result = simulate_otfs_im(cfg, MAP_TABLE_BAL);
+rng(cfg.rng_seed_im);
+conventional_ask_result = simulate_full_grid_otfs_im(conventional_ask_cfg);
 
-if cfg.enable_random_compare
-    random_result = compare_random_patterns(cfg);
-else
-    random_result = [];
-end
+rng(cfg.rng_seed_im);
+ask_result = simulate_full_grid_otfs_im(ask_cfg);
 
-if cfg.apply_display_error_floor
-    ofdm_result = apply_display_error_floor(cfg, ofdm_result, 'ofdm', cfg.N_fram_ofdm);
-    otfs_result = apply_display_error_floor(cfg, otfs_result, 'otfs', cfg.N_fram);
-    im_result = apply_display_error_floor(cfg, im_result, 'im', cfg.N_fram);
-    balanced_result = apply_display_error_floor(cfg, balanced_result, 'im', cfg.N_fram);
-    random_result = apply_display_error_floor(cfg, random_result, 'random', cfg.N_fram_random);
-end
+print_full_grid_results(cfg, qpsk_cfg, conventional_ask_cfg, ask_cfg, ...
+    otfs_result, qpsk_result, conventional_ask_result, ask_result);
+fig = plot_full_grid_ber(cfg, otfs_result, qpsk_result, ...
+    conventional_ask_result, ask_result);
 
-if cfg.save_results
-    save_simulation_results(cfg, MAP_TABLE, MAP_TABLE_BAL, ...
-        pattern_info, balanced_pattern_info, ...
-        ofdm_result, otfs_result, im_result, balanced_result, random_result);
-end
+mat_file = fullfile(results_dir, ...
+    sprintf('full_grid_results_%s.mat', run_tag));
+png_file = fullfile(results_dir, ...
+    sprintf('full_grid_ber_%s.png', run_tag));
+save(mat_file, 'cfg', 'qpsk_cfg', 'conventional_ask_cfg', 'ask_cfg', ...
+    'otfs_result', 'qpsk_result', 'conventional_ask_result', 'ask_result');
+saveas(fig, png_file);
+save(fullfile(results_dir, 'full_grid_results_latest.mat'), ...
+    'cfg', 'qpsk_cfg', 'conventional_ask_cfg', 'ask_cfg', ...
+    'otfs_result', 'qpsk_result', 'conventional_ask_result', 'ask_result');
+saveas(fig, fullfile(results_dir, 'full_grid_ber_latest.png'));
 
-print_pattern_method_results(cfg, ofdm_result, otfs_result, im_result, balanced_result, random_result);
-plot_pattern_method_results(cfg, ofdm_result, otfs_result, im_result, balanced_result, pattern_info, random_result);
+fprintf('\nSaved data   : %s\n', mat_file);
+fprintf('Saved figure : %s\n', png_file);
 toc;
+diary off;
+copyfile(console_file, fullfile(results_dir, 'full_grid_results_latest.txt'));

@@ -1,5 +1,4 @@
-% Evaluation role: OTFS transmitter block used by both baseline OTFS and
-% OTFS-IM. It provides the modulation path needed for fair BER comparison.
+% Vai trò: Khối phát OTFS dùng chung cho OTFS gốc và OTFS-IM.
 %
 % Copyright (c) 2018, Raviteja Patchava, Yi Hong, and Emanuele Viterbo, Monash University
 % All rights reserved.
@@ -28,7 +27,11 @@
 %    - Freely distributed for educational and research purposes
 %%
 function s = OTFS_modulation(N,M,x)
-%% OTFS Modulation: 1. ISFFT, 2. Heisenberg transform
+% OTFS_MODULATION đổi lưới delay-Doppler x thành tín hiệu thời gian s.
+% Bước 1: Dùng ISFFT để đổi từ miền delay-Doppler sang miền time-frequency.
+% Bước 2: Dùng biến đổi Heisenberg để tạo các mẫu tín hiệu thời gian.
+% Bước 3: Trải ma trận thành một vector để đưa qua kênh.
+%% Điều chế OTFS: 1. ISFFT, 2. biến đổi Heisenberg
 X = fft(ifft(x).').'/sqrt(M/N); %%%ISFFT
 s_mat = ifft(X.')*sqrt(M); % Heisenberg transform
 s = s_mat(:);

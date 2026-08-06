@@ -1,5 +1,4 @@
-% Evaluation role: OTFS receiver front-end used before MP detection. It maps
-% the received waveform back to the delay-Doppler grid for BER analysis.
+% Vai trò: Khối đầu máy thu, đưa tín hiệu nhận về lưới delay-Doppler.
 %
 % Copyright (c) 2018, Raviteja Patchava, Yi Hong, and Emanuele Viterbo, Monash University
 % All rights reserved.
@@ -28,7 +27,11 @@
 %    - Freely distributed for educational and research purposes
 %%
 function y = OTFS_demodulation(N,M,r)
-%% OTFS demodulation: 1. Wiegner transform, 2. SFFT
+% OTFS_DEMODULATION đổi tín hiệu thời gian r thành lưới quan sát y.
+% Bước 1: Xếp vector thu thành ma trận thời gian.
+% Bước 2: Dùng biến đổi Wigner để trở lại miền time-frequency.
+% Bước 3: Dùng SFFT để thu được lưới delay-Doppler N x M.
+%% Giải điều chế OTFS: 1. biến đổi Wigner, 2. SFFT
 r_mat = reshape(r,M,N);
 Y = fft(r_mat)/sqrt(M); % Wigner transform
 Y = Y.';
