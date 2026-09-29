@@ -1,9 +1,9 @@
 function result = simulate_baseline_otfs(cfg)
-% SIMULATE_BASELINE_OTFS mô phỏng hệ OTFS-QPSK gốc để làm đường chuẩn.
+% SIMULATE_BASELINE_OTFS mô phỏng hệ OTFS-16QAM gốc để làm đường chuẩn.
 % Trong mỗi frame:
-% Bước 1: Sinh bit ngẫu nhiên và điều chế QPSK cho toàn bộ 120 ô.
+% Bước 1: Sinh bit ngẫu nhiên và điều chế 16-QAM cho toàn bộ 120 ô.
 % Bước 2: Sinh kênh, điều chế OTFS, truyền qua kênh và giải điều chế OTFS.
-% Bước 3: Dùng MP để ước lượng QPSK tại mỗi ô.
+% Bước 3: Dùng MP để ước lượng 16-QAM tại mỗi ô.
 % Bước 4: Đổi symbol về bit, đếm lỗi và tính BER tổng.
 
 err_otfs = zeros(length(cfg.EbN0_dB), 1);
